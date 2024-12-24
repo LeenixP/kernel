@@ -1,0 +1,15 @@
+setenv kernel_version 5.10.209
+setenv cmdline earlyprintk console=ttyFIQ0 console=tty1 rootwait rw rootfstype=ext4
+
+#dtoverlay=<dtbo file path>
+#dtoverlay=/dtb/overlays/overlay-test.dtbo
+
+#fdtset <path> <prop> [<val>]
+#fdtset /leds status okay
+
+#fdtmknode <path> <node>
+#fdtmknode /leds rgb-test
+
+#fdtrm <path> [<prop>]
+#fdtrm /leds/rgb-led-r
+
