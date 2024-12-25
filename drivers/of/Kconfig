@@ -120,5 +120,14 @@ config OF_NUMA
 config OF_DMA_DEFAULT_COHERENT
 	# arches should select this if DMA is coherent by default for OF devices
 	bool
+	
+config OF_DTBOCFG
+    tristate "Device Tree Overlay Configuration File System support"
+    depends on CONFIGFS_FS
+    help
+      This option enables support for the Device Tree Overlay Configuration
+      File System, which allows for dynamic configuration of device tree
+      overlays at runtime.
+      If unsure, say N.
 
 endif # OF
