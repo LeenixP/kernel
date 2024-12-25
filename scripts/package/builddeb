@@ -137,22 +137,53 @@ rm -rf "$tmpdir" "$dbg_dir" debian/files
 mkdir -m 755 -p "$tmpdir/DEBIAN"
 mkdir -p "$tmpdir/lib" "$tmpdir/boot"
 
-# Install the kernel
-if [ "$ARCH" = "um" ] ; then
-	mkdir -p "$tmpdir/usr/lib/uml/modules/$version" "$tmpdir/usr/bin" "$tmpdir/usr/share/doc/$packagename"
-	cp System.map "$tmpdir/usr/lib/uml/modules/$version/System.map"
-	cp $KCONFIG_CONFIG "$tmpdir/usr/share/doc/$packagename/config"
-	gzip "$tmpdir/usr/share/doc/$packagename/config"
-else
-	cp System.map "$tmpdir/boot/System.map-$version"
-	cp $KCONFIG_CONFIG "$tmpdir/boot/config-$version"
-fi
-cp "$($MAKE -s -f $srctree/Makefile image_name)" "$tmpdir/$installed_image_path"
+if [ "$RK_USE_EXTBOOT_IMG" ]; then
+	# Added by Wu Caicheng. This is used to update the kernel with deb packages under the extboot mode.
+	installed_image_path="boot/Image-$version"
+	
+	cp System.map $tmpdir/boot/System.map-$version
+	cp $KCONFIG_CONFIG $tmpdir/boot/config-$version
+	echo "Copy kernel ${srctree}/arch/$SRCARCH/boot/Image $tmpdir/$installed_image_path"
+	cp ${srctree}/arch/$SRCARCH/boot/Image $tmpdir/$installed_image_path
 
-if is_enabled CONFIG_OF_EARLY_FLATTREE; then
-	# Only some architectures with OF support have this target
-	if [ -d "${srctree}/arch/$SRCARCH/boot/dts" ]; then
-		$MAKE -f $srctree/Makefile INSTALL_DTBS_PATH="$tmpdir/usr/lib/$packagename" dtbs_install
+	if is_enabled CONFIG_ARCH_ROCKCHIP; then
+		mkdir -p "$tmpdir/boot/configs" "$tmpdir/boot/dtb" 
+
+		echo mkimage -T script -C none -d $srctree/arch/$SRCARCH/boot/dts/rockchip/configs/boot.cmd $tmpdir/boot/boot.scr
+		mkimage -T script -C none -d $srctree/arch/$SRCARCH/boot/dts/rockchip/configs/boot.cmd $tmpdir/boot/boot.scr
+
+		echo Copy config $srctree/arch/$SRCARCH/boot/dts/rockchip/configs/* $tmpdir/boot/configs/
+		cp $srctree/arch/$SRCARCH/boot/dts/rockchip/configs/* $tmpdir/boot/configs/
+
+		echo Copy dtb $srctree/arch/$SRCARCH/boot/dts/rockchip/*.dtb $tmpdir/boot/dtb/
+		cp $srctree/arch/$SRCARCH/boot/dts/rockchip/*.dtb $tmpdir/boot/dtb/
+
+		echo Copy rk-kernel.dtb $tmpdir/boot/dtb/$RK_KERNEL_DTS.dtb $tmpdir/boot/rk-kernel.dtb
+		cp $tmpdir/boot/dtb/$RK_KERNEL_DTS.dtb $tmpdir/boot/rk-kernel.dtb
+	fi
+	echo Copy logo $srctree/logo.bmp $tmpdir/boot/
+	cp $srctree/logo.bmp $tmpdir/boot/
+	cp $srctree/logo_kernel.bmp $tmpdir/boot/
+else
+	# Install the kernel
+	if [ "$ARCH" = "um" ] ; then
+		mkdir -p "$tmpdir/usr/lib/uml/modules/$version" "$tmpdir/usr/bin" "$tmpdir/usr/share/doc/$packagename"
+		cp System.map "$tmpdir/usr/lib/uml/modules/$version/System.map"
+		cp $KCONFIG_CONFIG "$tmpdir/usr/share/doc/$packagename/config"
+		gzip "$tmpdir/usr/share/doc/$packagename/config"
+	else
+		cp System.map "$tmpdir/boot/System.map-$version"
+		cp $KCONFIG_CONFIG "$tmpdir/boot/config-$version"
+	fi
+
+	echo "Copy kernel $($MAKE -s -f $srctree/Makefile image_name) | $tmpdir/$installed_image_path"
+	cp "$($MAKE -s -f $srctree/Makefile image_name)" "$tmpdir/$installed_image_path"
+
+	if is_enabled CONFIG_OF_EARLY_FLATTREE; then
+		# Only some architectures with OF support have this target
+		if [ -d "${srctree}/arch/$SRCARCH/boot/dts" ]; then
+			$MAKE -f $srctree/Makefile INSTALL_DTBS_PATH="$tmpdir/usr/lib/$packagename" dtbs_install
+		fi
 	fi
 fi
 
