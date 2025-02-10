@@ -57,6 +57,12 @@
 #define	STMMAC_ALIGN(x)		ALIGN(ALIGN(x, SMP_CACHE_BYTES), 16)
 #define	TSO_MAX_BUFF_SIZE	(SZ_16K - 1)
 
+/* Add RTL_8211F port status LED by wucaicheng */
+#define RTL_8211F_PHY_ID        0x001cc916
+#define RTL_8211F_PHY_ID_MASK   0x001fffff
+#define RTL_8211F_PAGE_SELECT   0x1f
+#define RTL_8211F_LCR_ADDR      0x10
+
 /* Module parameters */
 #define TX_TIMEO	5000
 static int watchdog = TX_TIMEO;
@@ -4904,6 +4910,25 @@ static int stmmac_hw_init(struct stmmac_priv *priv)
 	return 0;
 }
 
+/* Add RTL_8211F port status LED by wucaicheng */
+static int phy_rtl8211f_led_fixup(struct phy_device *phydev)
+{
+	u32 val;
+	val = 0x6171;
+
+	pr_info("terry in : %s\n", __func__);
+
+	/*switch to page0xd04*/
+	phy_write(phydev, RTL_8211F_PAGE_SELECT, 0xd04);
+
+	/*set led1(green)  Link 10/100/1000M*/
+	phy_write(phydev, RTL_8211F_LCR_ADDR, val);
+
+	/*switch back to page0*/
+	phy_write(phydev,RTL_8211F_PAGE_SELECT, 0xa42);
+
+	return 0;
+}
 static void stmmac_napi_add(struct net_device *dev)
 {
 	struct stmmac_priv *priv = netdev_priv(dev);
@@ -5220,6 +5245,11 @@ int stmmac_dvr_probe(struct device *device,
 		goto error_phy_setup;
 	}
 
+    ret = phy_register_fixup_for_uid(RTL_8211F_PHY_ID, RTL_8211F_PHY_ID_MASK, phy_rtl8211f_led_fixup);
+    if (ret) {
+        dev_warn(priv->device, "Cannot register PHY board fixup, terry in :%s.\n", __func__);
+    }
+	
 	ret = register_netdev(ndev);
 	if (ret) {
 		dev_err(priv->device, "%s: ERROR %i registering the device\n",

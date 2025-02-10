@@ -43,7 +43,7 @@
 #include "tspi-rk3566-csi-v10.dtsi"
 
 //【开/关】网口 扩展板上使用的是千兆网，不接扩展板情况下可以关闭
-// #include "tspi-rk3566-gmac1-v10.dtsi"
+#include "tspi-rk3566-gmac1-v10.dtsi"
 
 //【开/关】下方是用户定义层，所有用户修改理论上在此下方修改就好了
 / {
