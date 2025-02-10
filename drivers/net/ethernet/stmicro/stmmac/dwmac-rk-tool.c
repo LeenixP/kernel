@@ -102,7 +102,7 @@ struct dwmac_rk_lb_priv {
 #define	STMMAC_ALIGN(x) __ALIGN_KERNEL(x, SMP_CACHE_BYTES)
 #define MAX_DELAYLINE 0x7f
 #define RK3588_MAX_DELAYLINE 0xc7
-#define SCAN_STEP 0x5
+#define SCAN_STEP CONFIG_DWMAC_RK_DELAYLINE_SCAN_STEP
 #define SCAN_VALID_RANGE 0xA
 
 #define DWMAC_RK_TEST_PKT_SIZE (sizeof(struct ethhdr) + sizeof(struct iphdr) + \
@@ -1606,3 +1606,57 @@ int dwmac_rk_remove_loopback_sysfs(struct device *device)
 
 	return 0;
 }
+
+/* Add auto-delay function by wucaicheng */
+#ifdef CONFIG_DWMAC_RK_AUTO_DELAYLINE
+int dwmac_rk_search_rgmii_delayline(struct stmmac_priv *priv)
+{
+	struct dwmac_rk_lb_priv *lb_priv;
+	int phy_iface = dwmac_rk_get_phy_interface(priv);
+	unsigned char delayline[2];
+	int ret;
+
+	if (phy_iface != PHY_INTERFACE_MODE_RGMII &&
+	    phy_iface != PHY_INTERFACE_MODE_RGMII_ID)
+		return 0;
+
+	memset(delayline, 0x0, sizeof(delayline));
+	ret = rk_vendor_read(LAN_RGMII_DL_ID, delayline, 2);
+	if (ret == 2 && 
+		(delayline[0] > 0 && delayline[0] < MAX_DELAYLINE) && 
+		(delayline[1] > 0 && delayline[1] < MAX_DELAYLINE)) {
+			
+		pr_info("Read rgmii delayline from vendor: tx = 0x%02x, rx = 0x%02x\n",
+			delayline[0], delayline[1]);
+		dwmac_rk_set_rgmii_delayline(priv, delayline[0], delayline[1]);
+
+		return 0;
+	}
+
+	lb_priv = kzalloc(sizeof(*lb_priv), GFP_KERNEL);
+	if (!lb_priv)
+		return -ENOMEM;
+
+#ifdef CONFIG_DWMAC_RK_AUTO_DELAYLINE_RAPID_SEARCH
+	lb_priv->sysfs = 0;
+#else
+	lb_priv->sysfs = 1;
+#endif
+	lb_priv->type = LOOPBACK_TYPE_PHY;
+	lb_priv->speed = LOOPBACK_SPEED1000;
+	lb_priv->scan = 1;
+
+	ret = dwmac_rk_loopback_run(priv, lb_priv);
+	if (!ret) {
+		delayline[0] = lb_priv->final_tx;
+		delayline[1] = lb_priv->final_rx;
+		if (!rk_vendor_write(LAN_RGMII_DL_ID, delayline, 2))
+		/* write tx/rx delayline back if loopback okay */
+		dwmac_rk_set_rgmii_delayline(priv, lb_priv->final_tx,
+					     lb_priv->final_rx);
+	}
+
+	kfree(lb_priv);
+	return ret;
+}
+#endif
