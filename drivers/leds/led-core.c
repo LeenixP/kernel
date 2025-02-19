@@ -151,9 +151,12 @@ static void led_set_software_blink(struct led_classdev *led_cdev,
 	if (!led_cdev->blink_brightness)
 		led_cdev->blink_brightness = led_cdev->max_brightness;
 
-	led_cdev->blink_delay_on = delay_on;
-	led_cdev->blink_delay_off = delay_off;
-
+	//trigger time,wucaicheng,1378913492@qq.com,20230914
+	if(!led_cdev->blink_delay_on && !led_cdev->blink_delay_off){
+		led_cdev->blink_delay_on = delay_on;
+		led_cdev->blink_delay_off = delay_off;
+	}
+	
 	/* never on - just set to off */
 	if (!delay_on) {
 		led_set_brightness_nosleep(led_cdev, LED_OFF);
