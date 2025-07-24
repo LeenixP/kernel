@@ -82,6 +82,111 @@
 		};
 	};
 	
+    regulators {
+        compatible = "simple-bus";
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        // LED控制 (GPIO0_D4)
+        led_en: led-en {
+            compatible = "regulator-fixed";
+            regulator-name = "led_en";
+            gpio = <&gpio0 RK_PD4 GPIO_ACTIVE_HIGH>;  // GPIO0_D4 = 28
+            enable-active-high;
+            regulator-always-on;
+        };
+
+        // WiFi使能 (GPIO2_C1)
+        wifi_en: wifi-en {
+            compatible = "regulator-fixed";
+            regulator-name = "wifi_en";
+            gpio = <&gpio2 RK_PC1 GPIO_ACTIVE_HIGH>;  // GPIO2_C1 = 81
+            enable-active-high;
+            regulator-always-on;
+        };
+
+        // HDMI使能 (GPIO2_C0)
+        hdmi_en: hdmi-en {
+            compatible = "regulator-fixed";
+            regulator-name = "hdmi_en";
+            gpio = <&gpio2 RK_PC0 GPIO_ACTIVE_HIGH>;  // GPIO2_C0 = 80
+            enable-active-high;
+            regulator-always-on;
+        };
+
+        // 网口使能 (GPIO3_D5)
+        eth_en: eth-en {
+            compatible = "regulator-fixed";
+            regulator-name = "eth_en";
+            gpio = <&gpio3 RK_PD5 GPIO_ACTIVE_HIGH>;  // GPIO3_D5 = 125
+            enable-active-high;
+            regulator-always-on;
+        };
+
+        // 喇叭使能 (GPIO3_A5)
+        spk_en: spk-en {
+            compatible = "regulator-fixed";
+            regulator-name = "spk_en";
+            gpio = <&gpio3 RK_PA5 GPIO_ACTIVE_HIGH>;  // GPIO3_A5 = 101
+            enable-active-high;
+            regulator-always-on;
+        };
+
+        // USB使能 (GPIO0_B7)
+        usb_en: usb-en {
+            compatible = "regulator-fixed";
+            regulator-name = "usb_en";
+            gpio = <&gpio0 RK_PB7 GPIO_ACTIVE_HIGH>;  // GPIO0_B7 = 15
+            enable-active-high;
+            regulator-always-on;
+        };
+
+        // MIPI DSI 3.3V (GPIO3_D3)
+        mipi_dsi_en: mipi-dsi-en {
+            compatible = "regulator-fixed";
+            regulator-name = "mipi_dsi_en";
+            gpio = <&gpio3 RK_PD3 GPIO_ACTIVE_HIGH>;  // GPIO3_D3 = 123
+            enable-active-high;
+            regulator-always-on;
+        };
+
+        // MIPI DSI 5V (GPIO0_D5)
+        mipi_dsi_vdd: mipi-dsi-vdd {
+            compatible = "regulator-fixed";
+            regulator-name = "mipi_dsi_vdd";
+            gpio = <&gpio0 RK_PD5 GPIO_ACTIVE_HIGH>;  // GPIO0_D5 = 29
+            enable-active-high;
+            regulator-always-on;
+        };
+
+        // 4G模块电源 (GPIO2_C6)
+        vcc_4g: vcc-4g {
+            compatible = "regulator-fixed";
+            regulator-name = "vcc_4g";
+            gpio = <&gpio2 RK_PC6 GPIO_ACTIVE_HIGH>;  // GPIO2_C6 = 86
+            enable-active-high;
+            regulator-always-on;
+        };
+
+        // USB HUB电源 (GPIO0_D3)
+        usb_hub_en: usb-hub-en {
+            compatible = "regulator-fixed";
+            regulator-name = "usb_hub_en";
+            gpio = <&gpio0 RK_PD3 GPIO_ACTIVE_HIGH>;  // GPIO0_D3 = 27
+            enable-active-high;
+            regulator-always-on;
+        };
+
+        // PCIe 3.3V电源 (GPIO3_D1)
+        pcie_3v3: pcie-3v3 {
+            compatible = "regulator-fixed";
+            regulator-name = "pcie_3v3";
+            gpio = <&gpio3 RK_PD1 GPIO_ACTIVE_HIGH>;  // GPIO3_D1 = 121
+            enable-active-high;
+            regulator-always-on;
+        };
+    };
+
 	vcc5v0_ex39_host: vcc5v0-ex39-host-regulator {
 		compatible = "regulator-fixed";
 		regulator-name = "vcc5v0_ex39_host";

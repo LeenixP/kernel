@@ -126,15 +126,17 @@
 
 	rk809_sound: rk809-sound {
 		status = "okay";
-		compatible = "rockchip,multicodecs-card";
-		rockchip,card-name = "rockchip-rk809";
-		hp-det-gpio = <&gpio3 RK_PA1 GPIO_ACTIVE_LOW>;
-		rockchip,format = "i2s";
-		rockchip,mclk-fs = <256>;
-		rockchip,cpu = <&i2s1_8ch>;
-		rockchip,codec = <&rk809_codec>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&hp_det>;
+		compatible = "simple-audio-card";
+		simple-audio-card,format = "i2s";
+		simple-audio-card,name = "rockchip,rk809-codec";
+		simple-audio-card,mclk-fs = <256>;
+
+		simple-audio-card,cpu {
+			sound-dai = <&i2s1_8ch>;
+		};
+		simple-audio-card,codec {
+			sound-dai = <&rk809_codec>;
+		};
 	};
 
 	spdif-sound {
@@ -266,8 +268,8 @@
 		pinctrl-0 = <&uart1m0_rtsn>;
 		pinctrl-1 = <&uart1_gpios>;
 		BT,reset_gpio    = <&gpio2 RK_PB7 GPIO_ACTIVE_HIGH>;
-		BT,wake_gpio     = <&gpio2 RK_PC1 GPIO_ACTIVE_HIGH>;
-		BT,wake_host_irq = <&gpio2 RK_PC0 GPIO_ACTIVE_HIGH>;
+		BT,wake_gpio     = <&gpio0 RK_PC3 GPIO_ACTIVE_HIGH>;
+		BT,wake_host_irq = <&gpio0 RK_PC4 GPIO_ACTIVE_HIGH>;
 		status = "okay";
 	};
 
@@ -299,9 +301,9 @@
 	disable-win-move;
 };
 
-&vp0 {
-	cursor-win-id = <ROCKCHIP_VOP2_CLUSTER0>;
-};
+// &vp0 {
+// 	cursor-win-id = <ROCKCHIP_VOP2_CLUSTER0>;
+// };
 &bus_npu {
 	bus-supply = <&vdd_logic>;
 	pvtm-supply = <&vdd_cpu>;
@@ -331,7 +333,7 @@
 	status = "okay";
 
 	vdd_cpu: tcs4525@1c {
-		compatible = "tcs,tcs4525";
+		compatible = "tcs,tcs452x";
 		reg = <0x1c>;
 		vin-supply = <&vcc5v0_sys>;
 		regulator-compatible = "fan53555-reg";
@@ -500,8 +502,8 @@
 			vccio_acodec: LDO_REG4 {
 				regulator-always-on;
 				regulator-boot-on;
-				regulator-min-microvolt = <3000000>;
-				regulator-max-microvolt = <3000000>;
+				regulator-min-microvolt = <3300000>;
+				regulator-max-microvolt = <3300000>;
 				regulator-name = "vccio_acodec";
 				regulator-state-mem {
 					regulator-off-in-suspend;
@@ -596,7 +598,7 @@
 		};
 
 		rk809_codec: codec {
-			#sound-dai-cells = <1>;
+			#sound-dai-cells = <0>;
 			compatible = "rockchip,rk809-codec", "rockchip,rk817-codec";
 			clocks = <&cru I2S1_MCLKOUT>;
 			clock-names = "mclk";
