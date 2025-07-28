@@ -54,7 +54,7 @@
 		compatible = "rockchip_headset";
 		headset_gpio = <&gpio0 RK_PC5 GPIO_ACTIVE_HIGH>;
 		pinctrl-names = "default";
-		pinctrl-0 = <&hp_det>;
+		// pinctrl-0 = <&hp_det>;
 	};
 
 	leds: leds {
